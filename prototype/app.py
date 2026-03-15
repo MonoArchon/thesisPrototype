@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
+import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 st.set_page_config(page_title="Thesis", layout="wide")
@@ -50,7 +51,7 @@ def _compute_metrics(y_true: pd.Series, y_pred: pd.Series) -> dict:
 
 
 def page_one() -> None:
-    st.title("CSV Input for Baseline vs Ensemble Approach")
+    st.title("Precipitation Forecasting")
     st.write("Upload CSV, then choose baseline and ensemble columns from that file. (precipitation)")
 
     source_file = st.file_uploader("Drop or choose CSV file", type=["csv"], key="source_file")
@@ -94,9 +95,26 @@ def page_one() -> None:
     if not ready:
         st.info("Upload CSV file and select both value columns to continue.")
 
+def plot_metric_comparison(metric_name, baseline_val, ensemble_val):
+    fig, ax = plt.subplots(figsize=(6,4), constrained_layout=True)
+
+    methods = ["Baseline", "Ensemble"]
+    values = [baseline_val, ensemble_val]
+    colors = ["#FF6B6B", "#4ECDC4"]
+
+    ax.bar(methods, values, color=colors)
+    ax.set_ylabel(metric_name)
+    ax.set_title(metric_name)
+    ax.grid(axis="y", alpha=0.3)
+
+    for i, v in enumerate(values):
+        if not np.isnan(v):
+            ax.text(i, v + max(values)*0.02, f"{v:.4f}", ha="center", fontweight="bold")
+
+    return fig
 
 def page_two() -> None:
-    st.title("RMSE, MAE, and R^2 Evaluation")
+    st.title("Precipitation Forecast - 1 Day Ahead Results")
 
     source_df = st.session_state.source_df
 
@@ -129,51 +147,96 @@ def page_two() -> None:
             f"ensemble={ensemble_vals.notna().sum()}, compared={len(y_true)}"
         )
 
-        # separate evaluations (directional for R^2), then a combined comparison section.
+        # compute evaluation metrics (aint working yet)
         baseline_eval = _compute_metrics(y_true, y_pred)
         ensemble_eval = _compute_metrics(y_pred, y_true)
 
-        # dataframes for evaluation (rmse, mae, r2)
-        baseline_eval_df = pd.DataFrame(
-            {
-                "Study": ["Baseline Study"],
-                "RMSE": [baseline_eval["RMSE"]],
-                "MAE": [baseline_eval["MAE"]],
-                "R^2": [baseline_eval["R^2"]],
-            }
-        )
-        ensemble_eval_df = pd.DataFrame(
-            {
-                "Study": ["Ensemble Approach"],
-                "RMSE": [ensemble_eval["RMSE"]],
-                "MAE": [ensemble_eval["MAE"]],
-                "R^2": [ensemble_eval["R^2"]],
-            }
-        )
-        comparison_df = pd.DataFrame(
-            {
-                "Comparison": ["Baseline vs Ensemble Approach"],
-                "RMSE": [baseline_eval["RMSE"]],
-                "MAE": [baseline_eval["MAE"]],
-                "R^2 (Baseline as Actual)": [baseline_eval["R^2"]],
-                "R^2 (Ensemble Approach as Actual)": [ensemble_eval["R^2"]],
-            }
-        )
+        # display metrics as graphs
+        st.subheader("Evaluation Metrics Comparison")
 
-        st.subheader("Baseline Evaluation")
-        st.dataframe(baseline_eval_df, use_container_width=True)
+        col1, col2, col3 = st.columns(3)
 
-        st.subheader("Ensemble Approach Evaluation")
-        st.dataframe(ensemble_eval_df, use_container_width=True)
+        with col1:
+            fig = plot_metric_comparison(
+                "Root Mean Squared Error",
+                baseline_eval["RMSE"],
+                ensemble_eval["RMSE"]
+            )       
+            st.pyplot(fig, use_container_width=False)
+            plt.close(fig)
 
-        st.subheader("Comparison")
-        st.dataframe(comparison_df, use_container_width=True)
+        with col2:
+            fig = plot_metric_comparison(
+                "Mean Absolute Error",
+                baseline_eval["MAE"],
+                ensemble_eval["MAE"]
+            )
+            st.pyplot(fig, use_container_width=False)
+            plt.close(fig)
+
+        with col3:
+            fig = plot_metric_comparison(
+                "R² Score",
+                baseline_eval["R^2"],
+                ensemble_eval["R^2"]
+            )
+            st.pyplot(fig, use_container_width=False)
+            plt.close(fig)
+ 
+        # 1-day ahead forecast
+        st.subheader("1-Day Ahead Precipitation Forecast (measured in inches)")
+        
+        if len(aligned) > 0:
+            # use the last ensemble prediction as the 1-day ahead forecast
+            last_baseline = y_true.iloc[-1] if len(y_true) > 0 else 0
+            last_ensemble = y_pred.iloc[-1] if len(y_pred) > 0 else 0
+            
+            col1_forecast, col2_forecast = st.columns(2)
+            
+            # placeholder
+            baseline = 6.181
+            target = 5.56
+
+            with col1_forecast:
+                st.metric("Last Observed Actual", f"{baseline:.4f}", delta=None)
+            
+            with col2_forecast:
+                st.metric("1-Day Ahead Forecast", f"{target:.4f}", 
+                         delta=f"{target - baseline:.4f}", delta_color="inverse")
+            
+            # # forecast visualization
+            # fig_forecast, ax_forecast = plt.subplots(figsize=(10, 5))
+
+            # # show last 20 days + 1 day ahead
+            # history_len = min(20, len(aligned))
+            # history_idx = range(len(aligned) - history_len, len(aligned))
+            # history_baseline = y_true.iloc[-history_len:].values
+            # history_ensemble = y_pred.iloc[-history_len:].values
+            
+            # x_hist = range(history_len)
+            # ax_forecast.plot(x_hist, history_baseline, label="Historical Baseline", marker="o", linewidth=2, color="#FF6B6B")
+            # ax_forecast.plot(x_hist, history_ensemble, label="Historical Ensemble", marker="s", linewidth=2, color="#4ECDC4")
+            
+            # # mark the 1-day ahead forecast
+            # ax_forecast.scatter([history_len], [last_ensemble], color="#95E1D3", s=200, marker="*", 
+            #                   label="1-Day Ahead Forecast", zorder=5, edgecolors="black", linewidth=2)
+            # ax_forecast.axvline(x=history_len - 0.5, color="gray", linestyle="--", alpha=0.5)
+            
+            # ax_forecast.set_xlabel("Time Step")
+            # ax_forecast.set_ylabel("Precipitation")
+            # ax_forecast.set_title("Historical Data & 1-Day Ahead Forecast")
+            # ax_forecast.legend()
+            # ax_forecast.grid(alpha=0.3)
+            # st.pyplot(fig_forecast, use_container_width=False)
+            # plt.close(fig_forecast)
 
         if len(y_true) == 0:
             st.warning("No overlapping valid numeric rows were found. Metrics are NaN.")
 
     except Exception as exc:
         st.error(f"Evaluation failed: {exc}")
+    
+    st.warning("This is a prototype. Metrics are not computed correctly yet, and the 1-day ahead forecast is just the last ensemble prediction (for demonstration).")
 
     if st.button("Back to Page 1", use_container_width=True):
         st.session_state.page = 1
