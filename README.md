@@ -1,8 +1,8 @@
 # thesisPrototype to run
 - install streamlit 
-  - pip install streamlit (run in bash)
+  - pip install streamlit (run in terminal)
 - after install
-  - streamlit run app.py (run in bash also)
+  - streamlit run app.py (run in terminal also)
 
 ## Page 1
 ![Page 1](imgExample/page1.png)
