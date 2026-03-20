@@ -52,7 +52,6 @@ def _compute_metrics(y_true: pd.Series, y_pred: pd.Series) -> dict:
 
 def page_one() -> None:
     st.title("Precipitation Forecasting")
-    st.write("Upload CSV, then choose baseline and ensemble columns from that file. (precipitation)")
 
     source_file = st.file_uploader("Drop or choose CSV file", type=["csv"], key="source_file")
     source_df = _read_csv(source_file)
@@ -152,7 +151,7 @@ def page_two() -> None:
         ensemble_eval = _compute_metrics(y_pred, y_true)
 
         # display metrics as graphs
-        st.subheader("Evaluation Metrics Comparison")
+        st.subheader("Evaluation Metrics")
 
         col1, col2, col3 = st.columns(3)
 
