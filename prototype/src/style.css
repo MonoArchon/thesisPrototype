@@ -1,0 +1,40 @@
+/*card style for guideline*/
+.card {
+    padding: 18px;
+    border-style: dashed;
+    border-radius: 12px;
+    border-color: #FFFFFF;
+    margin-bottom: 12px;
+    color: #111;
+    font-size: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* .title {
+    font-size: 62px;
+	max-width: 30ch;
+	transform-style: preserve-3d;
+    transform: skewY(-15deg);
+    text-shadow:
+    1px 1px 0 #999,
+    2px 2px 0 #777,
+    3px 3px 4px rgba(0,0,0,0.5);
+} */
+
+h1 {
+  /* margin: 20px; */
+  font-family: "Paytone One";
+  color: #202020;
+  text-transform: uppercase;
+  letter-spacing: -2px;
+}
+
+h1 span {
+  display: block;
+  margin: 11px 0 17px 0;
+  font-size: 80px;
+  line-height: 80px;
+  color: #f1ebe5;
+  text-shadow: 0 13.36px 8.896px #c4b59d,0 -2px 1px #fff;
+  letter-spacing: -4px;
+}
