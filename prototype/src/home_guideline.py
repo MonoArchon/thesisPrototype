@@ -10,12 +10,12 @@ import streamlit as st
 
 
 
-def custom_css() -> None:
-    with open("src/style.css") as f:
+def custom_css(file_name) -> None:
+    with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def home() -> None:
-    custom_css()
+    custom_css("src/style.css")
     
 
     col1, col2, col3 = st.columns(3, gap="xsmall")
@@ -42,7 +42,7 @@ def guideline() -> None:
     st.button("← Back to Home", on_click=lambda: st.session_state.update({"page": "home"}))
     st.title("Guideline for Precipitation Values")
 
-    custom_css()
+    custom_css("src/style.css")
 
     # --- Data ---
     rainfall_data = [
