@@ -35,7 +35,9 @@ def home() -> None:
 
 def guideline() -> None:
     st.markdown('<div id="Guideline"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="back-button-container">', unsafe_allow_html=True)
     st.button("← Back to Home", on_click=lambda: st.session_state.update({"page": "home"}))
+    st.markdown('</div>', unsafe_allow_html=True)
     st.title("Guideline for Precipitation Values")
 
     custom_css("style.css")

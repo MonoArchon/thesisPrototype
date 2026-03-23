@@ -61,3 +61,15 @@ h1 span {
 .nav-container button {
     width: 100% !important;
 }
+
+/* back button */
+.back-button-container button {
+    background-color: transparent !important;
+    border: 1px solid #ddd !important;
+    color: #666 !important;
+}
+
+.back-button-container button:hover {
+    border-color: #999 !important;
+    color: #000 !important;
+}

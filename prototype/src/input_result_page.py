@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from src.home_guideline import custom_css
+
+custom_css("style.css")
 
 def _read_csv(uploaded_file):
     if uploaded_file is None:
@@ -36,7 +39,12 @@ def _compute_metrics(y_true: pd.Series, y_pred: pd.Series) -> dict:
 
 def page_one() -> None:
     st.markdown('<div id="Input"></div>', unsafe_allow_html=True)
+    
+    # Wrap back button in its own container
+    st.markdown('<div class="back-button-container">', unsafe_allow_html=True)
     st.button("← Back to Home", on_click=lambda: st.session_state.update({"page": "home"}))
+    st.markdown('</div>', unsafe_allow_html=True)
+    
     st.title("Precipitation Forecasting")
 
     source_file = st.file_uploader("Drop or choose CSV file", type=["csv"], key="source_file")
@@ -46,24 +54,22 @@ def page_one() -> None:
         st.caption(f"Rows loaded: {len(source_df)}")
         st.dataframe(source_df, use_container_width=True, height=320)
 
-        num_cols = _numeric_columns(source_df)
-        if not num_cols:
-            st.error("No numeric-like column found in the CSV.")
+        # Find precipitation column (look for PRCP or precipitation)
+        precip_col = None
+        for col in source_df.columns:
+            col_lower = col.lower()
+            if "prcp" in col_lower or "precip" in col_lower or "rain" in col_lower:
+                precip_col = col
+                break
+        
+        if precip_col:
+            st.session_state.baseline_value_col = precip_col
+            st.session_state.ensemble_value_col = precip_col
         else:
-            c1, c2 = st.columns(2)
-            with c1:
-                st.session_state.baseline_value_col = st.selectbox(
-                    "Baseline value column",
-                    options=num_cols,
-                    key="baseline_value_select",
-                )
-            with c2:
-                st.session_state.ensemble_value_col = st.selectbox(
-                    "Ensemble Approach value column",
-                    options=num_cols,
-                    key="ensemble_value_select",
-                )
-
+            st.error(f"No precipitation column found. Available columns: {', '.join(source_df.columns)}")
+            st.session_state.baseline_value_col = None
+            st.session_state.ensemble_value_col = None
+            st.warning("Please ensure your CSV has a column with precipitation values (e.g., 'PRCP', 'Precipitation', 'Rain').")
 
     ready = all(
         [
@@ -78,7 +84,7 @@ def page_one() -> None:
         st.rerun()
 
     if not ready:
-        st.info("Upload CSV file and select both value columns to continue.")
+        st.info("Upload CSV file with a precipitation column to continue.")
 
 def plot_metric_comparison(metric_name, baseline_val, ensemble_val):
     fig, ax = plt.subplots(figsize=(6,4), constrained_layout=True)
