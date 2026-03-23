@@ -1,9 +1,8 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
-from src.home_guideline import home, guideline
+from src.home_guideline import home, guideline, custom_css
 from src.input_result_page import page_one, page_two
 
-
+custom_css("style.css")
 st.set_page_config(page_title="Thesis", layout="wide")
 
 
@@ -21,6 +20,28 @@ def _init_state():
 
 _init_state()
 
+sections = ["Home", "Input", "Guideline"]
+
+nav_container = st.container()
+with nav_container:
+    st.markdown('<div class="nav-container">', unsafe_allow_html=True)
+    
+    cols = st.columns(len(sections))
+    for i, sec in enumerate(sections):
+        is_active = st.session_state["page"] == sec.lower()
+        button_type = "primary" if is_active else "secondary"
+        
+        if cols[i].button(
+            sec,
+            key=f"nav_{sec}",
+            type=button_type,
+            use_container_width=True
+        ):
+            st.session_state["page"] = sec.lower()
+            st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+        
 page = st.session_state["page"]
 
 if page == "home":

@@ -1,13 +1,5 @@
 import streamlit as st
 from pathlib import Path
-# from streamlit_option_menu import option_menu
-
-# selected = option_menu(
-#     menu_title=None,
-#     options=["Home", "Input", "Guideline"],
-#     icons=["house", "upload", "book"],
-#     orientation="horizontal"
-# )
 
 
 
@@ -17,6 +9,7 @@ def custom_css(file_name) -> None:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def home() -> None:
+    st.markdown('<div id="Home"></div>', unsafe_allow_html=True)
     custom_css("style.css")
     
 
@@ -41,6 +34,7 @@ def home() -> None:
     #         st.rerun()
 
 def guideline() -> None:
+    st.markdown('<div id="Guideline"></div>', unsafe_allow_html=True)
     st.button("← Back to Home", on_click=lambda: st.session_state.update({"page": "home"}))
     st.title("Guideline for Precipitation Values")
 
@@ -66,10 +60,14 @@ def guideline() -> None:
 
         for col, item in zip([col1, col2], rainfall_data[i:i+2]):
             inch, desc, color = item
+            st.markdown(f"<br>", unsafe_allow_html=True)
             with col:
                 st.markdown(
                     f"""
-                    <div class="card" style="background-color:{color};">
+                    <div class="card" style="
+                    background-color:{color};
+                    border: 2px solid {color};
+                    box-shadow: 0 0 10px {color}, 0 0 20px {color};">
                         <h4>{inch}</h4>
                         <p>{desc}</p>
                     </div>

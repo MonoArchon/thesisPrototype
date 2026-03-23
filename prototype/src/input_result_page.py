@@ -35,6 +35,7 @@ def _compute_metrics(y_true: pd.Series, y_pred: pd.Series) -> dict:
 
 
 def page_one() -> None:
+    st.markdown('<div id="Input"></div>', unsafe_allow_html=True)
     st.button("← Back to Home", on_click=lambda: st.session_state.update({"page": "home"}))
     st.title("Precipitation Forecasting")
 

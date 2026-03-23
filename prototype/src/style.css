@@ -3,11 +3,9 @@
     padding: 18px;
     border-style: dashed;
     border-radius: 12px;
-    border-color: #FFFFFF;
     margin-bottom: 12px;
     color: #111;
     font-size: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
 /* .title {
@@ -37,4 +35,29 @@ h1 span {
   color: #f1ebe5;
   text-shadow: 0 13.36px 8.896px #c4b59d,0 -2px 1px #fff;
   letter-spacing: -4px;
+}
+
+.nav-container button[kind="secondary"] {
+    background-color: transparent !important;
+    border: none !important;
+    color: #666 !important;
+}
+
+.nav-container button[kind="secondary"]:hover {
+    color: #000 !important;
+    background-color: #f0f0f0 !important;
+}
+
+.nav-container button[kind="primary"] {
+    background-color: #ff4b4b !important;
+    color: white !important;
+    border: none !important;
+}
+
+.nav-container button[kind="primary"]:hover {
+    background-color: #ff6b6b !important;
+}
+
+.nav-container button {
+    width: 100% !important;
 }
