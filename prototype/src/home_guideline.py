@@ -1,4 +1,5 @@
 import streamlit as st
+from pathlib import Path
 # from streamlit_option_menu import option_menu
 
 # selected = option_menu(
@@ -11,7 +12,8 @@ import streamlit as st
 
 
 def custom_css(file_name) -> None:
-    with open(file_name) as f:
+    css_path = Path(__file__).parent / file_name
+    with open(css_path) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def home() -> None:
