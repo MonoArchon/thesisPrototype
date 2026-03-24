@@ -3,8 +3,6 @@ from src.home_guideline import home, guideline, custom_css
 from src.input_result_page import page_one, page_two
 
 custom_css("style.css")
-st.set_page_config(page_title="Thesis", layout="wide")
-
 
 def _init_state():
     defaults = {
