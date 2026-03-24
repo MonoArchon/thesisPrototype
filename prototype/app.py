@@ -2,6 +2,7 @@ import streamlit as st
 from src.home_guideline import home, guideline, custom_css
 from src.input_result_page import page_one, page_two
 
+st.set_page_config(page_title="Thesis", layout="wide")
 custom_css("style.css")
 
 def _init_state():

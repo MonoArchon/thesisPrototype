@@ -85,6 +85,7 @@ def page_one() -> None:
 
     if not ready:
         st.info("Upload CSV file with a precipitation column to continue.")
+    st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 
 def plot_metric_comparison(metric_name, baseline_val, ensemble_val):
     fig, ax = plt.subplots(figsize=(6,4), constrained_layout=True)

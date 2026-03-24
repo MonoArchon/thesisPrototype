@@ -44,16 +44,16 @@ def guideline() -> None:
 
     # --- Data ---
     rainfall_data = [
-        ("1 inch", "Light to moderate rain<br>• Usually manageable, minor puddles<br>• Beneficial for crops", "#d4edda"),
-        ("2 inches", "Moderate rain<br>• Some street flooding possible<br>• Drains may start to struggle", "#c3e6cb"),
-        ("3 inches", "Heavy rain<br>• Localized flooding begins<br>• Small rivers/creeks may rise", "#ffeeba"),
-        ("4 inches", "Very heavy rain<br>• Flooding likely in low-lying areas<br>• Travel disruptions possible", "#ffdf7e"),
-        ("5 inches", "Intense rainfall<br>• Flash flooding risk increases<br>• Drainage systems overwhelmed", "#f5c6cb"),
-        ("6 inches", "Severe rainfall<br>• Widespread flooding likely<br>• Roads may become impassable", "#f1b0b7"),
-        ("7 inches", "Very severe<br>• Flash floods + river flooding<br>• Possible evacuations", "#ea868f"),
-        ("8 inches", "Extreme rainfall<br>• Major flooding expected<br>• Infrastructure damage possible", "#e35d6a"),
-        ("9 inches", "Dangerous / rare<br>• Severe flooding<br>• Landslides possible", "#dc3545"),
-        ("10 inches", "Catastrophic rainfall<br>• Life-threatening floods<br>• Disaster-level impact", "#b02a37"),
+        ("1 inch", "Light to moderate rain<br>• Usually manageable, minor puddles<br>• Beneficial for crops", "#d4edda", "#59cc74"),
+        ("2 inches", "Moderate rain<br>• Some street flooding possible<br>• Drains may start to struggle", "#c3e6cb", "#4cc969"),
+        ("3 inches", "Heavy rain<br>• Localized flooding begins<br>• Small rivers/creeks may rise", "#ffeeba", "#d1b04d"),
+        ("4 inches", "Very heavy rain<br>• Flooding likely in low-lying areas<br>• Travel disruptions possible", "#ffdf7e", "#c09e36"),
+        ("5 inches", "Intense rainfall<br>• Flash flooding risk increases<br>• Drainage systems overwhelmed", "#f5c6cb", "#c55e67"),
+        ("6 inches", "Severe rainfall<br>• Widespread flooding likely<br>• Roads may become impassable", "#f1b0b7", "#cf555f"),
+        ("7 inches", "Very severe<br>• Flash floods + river flooding<br>• Possible evacuations", "#ea868f", "#d64c58"),
+        ("8 inches", "Extreme rainfall<br>• Major flooding expected<br>• Infrastructure damage possible", "#e35d6a", "#d32133"),
+        ("9 inches", "Dangerous / rare<br>• Severe flooding<br>• Landslides possible", "#dc3545", "#d48189"),
+        ("10 inches", "Catastrophic rainfall<br>• Life-threatening floods<br>• Disaster-level impact", "#b02a37", "#cfa2a7"),
     ]
 
     # --- Layout (2 cards per row) ---
@@ -61,15 +61,15 @@ def guideline() -> None:
         col1, col2 = st.columns(2)
 
         for col, item in zip([col1, col2], rainfall_data[i:i+2]):
-            inch, desc, color = item
+            inch, desc, color, bdr_color = item
             st.markdown(f"<br>", unsafe_allow_html=True)
             with col:
                 st.markdown(
                     f"""
                     <div class="card" style="
                     background-color:{color};
-                    border: 2px solid {color};
-                    box-shadow: 0 0 10px {color}, 0 0 20px {color};">
+                    border: 2px solid {bdr_color};
+                    box-shadow: 0 0 10px {bdr_color}, 0 0 20px {bdr_color};">
                         <h4>{inch}</h4>
                         <p>{desc}</p>
                     </div>
