@@ -1,7 +1,8 @@
 import streamlit as st
 from pathlib import Path
+import streamlit.components.v1 as components
 
-
+anchor_ids = ["Input", "Guideline"]
 
 def custom_css(file_name) -> None:
     css_path = Path(__file__).parent / file_name
@@ -12,18 +13,27 @@ def home() -> None:
     st.markdown('<div id="Home"></div>', unsafe_allow_html=True)
     custom_css("style.css")
     
-
     col1, col2, col3 = st.columns(3, gap="xsmall")
     with col1:
         st.markdown("<h1 class='title'>Ensemble LSTM-XGBoost for Improving Univariate Precipitation Time Series Forecasting</h1>", unsafe_allow_html=True)
-        # st.markdown("<br><br><br>", unsafe_allow_html=True)
         if st.button("Get Started", use_container_width=True):
-            st.session_state["page"] = "input"
-            st.rerun()
-
+                components.html(
+                """
+                <script>
+                    window.parent.document.getElementById('Input').scrollIntoView({behavior: 'smooth'});
+                </script>
+                """,
+                height=0
+            )
         if st.button("Guideline", use_container_width=True):
-            st.session_state["page"] = "guideline"
-            st.rerun()
+                components.html(
+                """
+                <script>
+                    window.parent.document.getElementById('Guideline').scrollIntoView({behavior: 'smooth'});
+                </script>
+                """,
+                height=0
+            )
     # with col2:
     #     if st.button("Get Started", use_container_width=True):
     #         st.session_state["page"] = "input"
@@ -36,7 +46,6 @@ def home() -> None:
 def guideline() -> None:
     st.markdown('<div id="Guideline"></div>', unsafe_allow_html=True)
     st.markdown('<div class="back-button-container">', unsafe_allow_html=True)
-    st.button("← Back to Home", on_click=lambda: st.session_state.update({"page": "home"}))
     st.markdown('</div>', unsafe_allow_html=True)
     st.title("Guideline for Precipitation Values")
 

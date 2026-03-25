@@ -42,7 +42,6 @@ def page_one() -> None:
     
     # Wrap back button in its own container
     st.markdown('<div class="back-button-container">', unsafe_allow_html=True)
-    st.button("← Back to Home", on_click=lambda: st.session_state.update({"page": "home"}))
     st.markdown('</div>', unsafe_allow_html=True)
     
     st.title("Precipitation Forecasting")
@@ -113,7 +112,7 @@ def page_two() -> None:
     if source_df is None:
         st.warning("Data is missing. Please return to Page 1 and upload the CSV file.")
         if st.button("Back to Page 1"):
-            st.session_state["page"] = "input"
+            st.session_state["page"] = "home"
             st.rerun()
         return
 
@@ -204,6 +203,6 @@ def page_two() -> None:
     
     st.warning("This is a prototype. Metrics are not computed correctly yet, and the 1-day ahead forecast is just the last ensemble prediction (for demonstration).")
 
-    if st.button("Back to Page 1", use_container_width=True):
-        st.session_state["page"] = "input"
+    if st.button("Back to Home", use_container_width=True):
+        st.session_state["page"] = "home"
         st.rerun()

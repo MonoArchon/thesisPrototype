@@ -1,4 +1,5 @@
 streamlit
+streamlit-scroll-navigation
 pandas
 numpy
 matplotlib
