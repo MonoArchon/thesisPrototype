@@ -1,8 +1,8 @@
 # thesisPrototype to run
 - install streamlit 
-  - pip install streamlit (run in terminal)
+  - pip install requirements.txt (run in terminal)
 - after install
-  - streamlit run app.py (run in terminal also)
+  - streamlit run app.py (run in terminal also(make sure that its in the correct directory))
 
 ## Page 1
 ![Page 1](imgExample/page1.png)
