@@ -6,8 +6,8 @@ from streamlit_scroll_navigation import scroll_navbar
 st.set_page_config(page_title="Thesis", layout="wide")
 custom_css("style.css")
 
-anchor_ids = ["Home", "Input", "Guideline"]
-anchor_labels = ["Home", "Forecasting", "Guideline"]
+anchor_ids = ["Input", "Guideline"]
+anchor_labels = ["Forecasting", "Guideline"]
 
 with st.sidebar:
     st.subheader("Navigation")
@@ -30,8 +30,7 @@ _init_state()
 page = st.session_state["page"]
 
 if page == "home":
-    home()
-    guideline()
     page_one()
+    guideline()
 elif page == "results":
     page_two()

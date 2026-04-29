@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import streamlit.components.v1 as components
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from src.home_guideline import custom_css
 
@@ -39,11 +40,6 @@ def _compute_metrics(y_true: pd.Series, y_pred: pd.Series) -> dict:
 
 def page_one() -> None:
     st.markdown('<div id="Input"></div>', unsafe_allow_html=True)
-    
-    # Wrap back button in its own container
-    st.markdown('<div class="back-button-container">', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    
     st.title("Precipitation Forecasting")
 
     source_file = st.file_uploader("Drop or choose CSV file", type=["csv"], key="source_file")
@@ -84,8 +80,8 @@ def page_one() -> None:
 
     if not ready:
         st.info("Upload CSV file with a precipitation column to continue.")
-    st.markdown("<br><br><br><br>", unsafe_allow_html=True)
-
+    st.markdown("<br><br>", unsafe_allow_html=True)
+                
 def plot_metric_comparison(metric_name, baseline_val, ensemble_val):
     fig, ax = plt.subplots(figsize=(6,4), constrained_layout=True)
 
@@ -96,6 +92,37 @@ def plot_metric_comparison(metric_name, baseline_val, ensemble_val):
     ax.bar(methods, values, color=colors)
     ax.set_ylabel(metric_name)
     ax.set_title(metric_name)
+    ax.grid(axis="y", alpha=0.3)
+
+    for i, v in enumerate(values):
+        if not np.isnan(v):
+            ax.text(i, v + max(values)*0.02, f"{v:.4f}", ha="center", fontweight="bold")
+
+    return fig
+
+def plot_single_metric(metric_name, value, unit):
+    fig, ax = plt.subplots(figsize=(6,4), constrained_layout=True)
+
+    ax.bar([metric_name], [value], color="#4ECDC4")
+    ax.set_ylabel(unit)
+    ax.set_title(metric_name)
+    ax.grid(axis="y", alpha=0.3)
+
+    if not np.isnan(value):
+        ax.text(0, value + value*0.02, f"{value:.2f}", ha="center", fontweight="bold")
+
+    return fig
+
+def plot_mirror_comparison(metric_name, current_val, previous_val):
+    fig, ax = plt.subplots(figsize=(6,4), constrained_layout=True)
+
+    methods = ["Current", "Previous"]
+    values = [current_val, previous_val]
+    colors = ["#4ECDC4", "#95E1D3"]
+
+    ax.bar(methods, values, color=colors)
+    ax.set_ylabel(metric_name)
+    ax.set_title(f"{metric_name} (Current vs Previous)")
     ax.grid(axis="y", alpha=0.3)
 
     for i, v in enumerate(values):
@@ -142,38 +169,146 @@ def page_two() -> None:
         baseline_eval = _compute_metrics(y_true, y_pred)
         ensemble_eval = _compute_metrics(y_pred, y_true)
 
-        # display metrics as graphs
-        st.subheader("Evaluation Metrics")
+        # Initialize previous results if not exists
+        if "previous_baseline_eval" not in st.session_state:
+            st.session_state.previous_baseline_eval = baseline_eval
+            st.session_state.previous_ensemble_eval = ensemble_eval
+        
+        # Store current results for next comparison
+        previous_baseline = st.session_state.get("previous_baseline_eval", baseline_eval)
+        previous_ensemble = st.session_state.get("previous_ensemble_eval", ensemble_eval)
+        st.session_state.previous_baseline_eval = baseline_eval
+        st.session_state.previous_ensemble_eval = ensemble_eval
 
-        col1, col2, col3 = st.columns(3)
+        # Initialize mirror comparison toggle
+        if "show_mirror" not in st.session_state:
+            st.session_state.show_mirror = False
 
-        with col1:
-            fig = plot_metric_comparison(
-                "Root Mean Squared Error",
-                baseline_eval["RMSE"],
-                ensemble_eval["RMSE"]
-            )       
-            st.pyplot(fig, use_container_width=False)
-            plt.close(fig)
+        # Toggle button for mirror comparison
+        if st.button("Toggle Mirror Comparison", key="mirror_toggle"):
+            st.session_state.show_mirror = not st.session_state.show_mirror
+            st.rerun()
 
-        with col2:
-            fig = plot_metric_comparison(
-                "Mean Absolute Error",
-                baseline_eval["MAE"],
-                ensemble_eval["MAE"]
-            )
-            st.pyplot(fig, use_container_width=False)
-            plt.close(fig)
+        # Main content with optional right sidebar
+        left_col, right_col = st.columns([3, 2]) if st.session_state.show_mirror else (st.container(), None)
 
-        with col3:
-            fig = plot_metric_comparison(
-                "R² Score",
-                baseline_eval["R^2"],
-                ensemble_eval["R^2"]
-            )
-            st.pyplot(fig, use_container_width=False)
-            plt.close(fig)
- 
+        with left_col:
+            # display metrics as graphs
+            st.subheader("Evaluation Metrics")
+
+            # Use vertical layout when mirror is shown, horizontal otherwise
+            if st.session_state.show_mirror:
+                # Vertical layout
+                fig = plot_metric_comparison(
+                    "Root Mean Squared Error",
+                    baseline_eval["RMSE"],
+                    ensemble_eval["RMSE"]
+                )       
+                st.pyplot(fig, use_container_width=False)
+                plt.close(fig)
+
+                fig = plot_metric_comparison(
+                    "Mean Absolute Error",
+                    baseline_eval["MAE"],
+                    ensemble_eval["MAE"]
+                )
+                st.pyplot(fig, use_container_width=False)
+                plt.close(fig)
+
+                fig = plot_metric_comparison(
+                    "R² Score",
+                    baseline_eval["R^2"],
+                    ensemble_eval["R^2"]
+                )
+                st.pyplot(fig, use_container_width=False)
+                plt.close(fig)
+            else:
+                # Horizontal layout
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    fig = plot_metric_comparison(
+                        "Root Mean Squared Error",
+                        baseline_eval["RMSE"],
+                        ensemble_eval["RMSE"]
+                    )       
+                    st.pyplot(fig, use_container_width=False)
+                    plt.close(fig)
+
+                with col2:
+                    fig = plot_metric_comparison(
+                        "Mean Absolute Error",
+                        baseline_eval["MAE"],
+                        ensemble_eval["MAE"]
+                    )
+                    st.pyplot(fig, use_container_width=False)
+                    plt.close(fig)
+
+                with col3:
+                    fig = plot_metric_comparison(
+                        "R² Score",
+                        baseline_eval["R^2"],
+                        ensemble_eval["R^2"]
+                    )
+                    st.pyplot(fig, use_container_width=False)
+                    plt.close(fig)
+     
+            # System Performance Metrics (hidden when mirror comparison is shown)
+            if not st.session_state.show_mirror:
+                st.subheader("System Performance Metrics")
+
+                col4, col5, col6 = st.columns(3)
+
+                with col4:
+                    fig = plot_single_metric("Runtime", 2.5, "seconds")
+                    st.pyplot(fig, use_container_width=False)
+                    plt.close(fig)
+
+                with col5:
+                    fig = plot_single_metric("CPU Usage", 45.0, "%")
+                    st.pyplot(fig, use_container_width=False)
+                    plt.close(fig)
+
+                with col6:
+                    fig = plot_single_metric("GPU Usage", 30.0, "%")
+                    st.pyplot(fig, use_container_width=False)
+                    plt.close(fig)
+
+        # Mirror Comparison on the right side
+        if st.session_state.show_mirror and right_col:
+            with right_col:
+                st.subheader("Mirror Comparison")
+                st.caption("Current vs Previous")
+
+                col7, = st.columns(1)
+
+                with col7:
+                    fig = plot_mirror_comparison(
+                        "RMSE",
+                        baseline_eval["RMSE"],
+                        previous_baseline["RMSE"]
+                    )
+                    st.pyplot(fig, use_container_width=True)
+                    plt.close(fig)
+
+                with col7:
+                    fig = plot_mirror_comparison(
+                        "MAE",
+                        baseline_eval["MAE"],
+                        previous_baseline["MAE"]
+                    )
+                    st.pyplot(fig, use_container_width=True)
+                    plt.close(fig)
+
+                with col7:
+                    fig = plot_mirror_comparison(
+                        "R² Score",
+                        baseline_eval["R^2"],
+                        previous_baseline["R^2"]
+                    )
+                    st.pyplot(fig, use_container_width=True)
+                    plt.close(fig)
+
         # 1-day ahead forecast
         st.subheader("1-Day Ahead Precipitation Forecast (measured in inches)")
         
