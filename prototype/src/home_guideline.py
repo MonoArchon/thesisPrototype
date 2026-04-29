@@ -67,9 +67,9 @@ def guideline() -> None:
 
     # --- Layout (2 cards per row) ---
     for i in range(0, len(rainfall_data), 2):
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns([1,1,1], gap="xxsmall")
 
-        for col, item in zip([col1, col2], rainfall_data[i:i+2]):
+        for col, item in zip([col1, col3], rainfall_data[i:i+2]):
             inch, desc, color, bdr_color = item
             st.markdown(f"<br>", unsafe_allow_html=True)
             with col:
