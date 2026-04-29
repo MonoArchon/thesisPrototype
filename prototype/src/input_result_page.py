@@ -37,11 +37,7 @@ def _compute_metrics(y_true: pd.Series, y_pred: pd.Series) -> dict:
     r2 = float(r2_score(y_true, y_pred)) if len(y_true) >= 2 else np.nan
     return {"RMSE": rmse, "MAE": mae, "R^2": r2}
 
-
-def page_one() -> None:
-    st.markdown('<div id="Input"></div>', unsafe_allow_html=True)
-    st.title("Precipitation Forecasting")
-
+def input() -> None:
     source_file = st.file_uploader("Drop or choose CSV file", type=["csv"], key="source_file")
     source_df = _read_csv(source_file)
     if source_df is not None:
@@ -80,6 +76,12 @@ def page_one() -> None:
 
     if not ready:
         st.info("Upload CSV file with a precipitation column to continue.")
+
+def page_one() -> None:
+    st.markdown('<div id="Input"></div>', unsafe_allow_html=True)
+    st.title("Precipitation Forecasting")
+
+    input()
     st.markdown("<br><br>", unsafe_allow_html=True)
                 
 def plot_metric_comparison(metric_name, baseline_val, ensemble_val):
@@ -169,25 +171,33 @@ def page_two() -> None:
         baseline_eval = _compute_metrics(y_true, y_pred)
         ensemble_eval = _compute_metrics(y_pred, y_true)
 
-        # Initialize previous results if not exists
-        if "previous_baseline_eval" not in st.session_state:
-            st.session_state.previous_baseline_eval = baseline_eval
-            st.session_state.previous_ensemble_eval = ensemble_eval
-        
+        # Detect whether a previous result is already stored
+        has_previous = "previous_baseline_eval" in st.session_state
+
+        current_actual = float(y_true.iloc[-1]) if len(y_true) > 0 else np.nan
+        current_forecast = float(y_pred.iloc[-1]) if len(y_pred) > 0 else np.nan
+        previous_actual = st.session_state.get("previous_actual", np.nan)
+        previous_forecast = st.session_state.get("previous_forecast", np.nan)
+
         # Store current results for next comparison
         previous_baseline = st.session_state.get("previous_baseline_eval", baseline_eval)
         previous_ensemble = st.session_state.get("previous_ensemble_eval", ensemble_eval)
         st.session_state.previous_baseline_eval = baseline_eval
         st.session_state.previous_ensemble_eval = ensemble_eval
+        st.session_state.previous_actual = current_actual
+        st.session_state.previous_forecast = current_forecast
 
         # Initialize mirror comparison toggle
         if "show_mirror" not in st.session_state:
             st.session_state.show_mirror = False
 
-        # Toggle button for mirror comparison
-        if st.button("Toggle Mirror Comparison", key="mirror_toggle"):
-            st.session_state.show_mirror = not st.session_state.show_mirror
-            st.rerun()
+        # Only show toggle if this is a secondary input (prior results exist)
+        if has_previous:
+            if st.button("Toggle Mirror Comparison", key="mirror_toggle"):
+                st.session_state.show_mirror = not st.session_state.show_mirror
+                st.rerun()
+        else:
+            st.session_state.show_mirror = False
 
         # Main content with optional right sidebar
         left_col, right_col = st.columns([3, 2]) if st.session_state.show_mirror else (st.container(), None)
@@ -251,8 +261,7 @@ def page_two() -> None:
                         ensemble_eval["R^2"]
                     )
                     st.pyplot(fig, use_container_width=False)
-                    plt.close(fig)
-     
+                    plt.close(fig)     
             # System Performance Metrics (hidden when mirror comparison is shown)
             if not st.session_state.show_mirror:
                 st.subheader("System Performance Metrics")
@@ -277,9 +286,16 @@ def page_two() -> None:
         # Mirror Comparison on the right side
         if st.session_state.show_mirror and right_col:
             with right_col:
-                st.subheader("Mirror Comparison")
+                st.subheader("1-Day Ahead Precipitation Forecast (measured in inches)")
                 st.caption("Current vs Previous")
 
+                current_col, previous_col = st.columns(2)
+                with current_col:
+                    st.metric("Current Forecast", f"{current_forecast:.4f}")
+                with previous_col:
+                    st.metric("Previous Forecast", f"{previous_forecast:.4f}")
+
+                st.markdown("---")
                 col7, = st.columns(1)
 
                 with col7:
@@ -329,9 +345,12 @@ def page_two() -> None:
             with col2_forecast:
                 st.metric("1-Day Ahead Forecast", f"{target:.4f}", 
                          delta=f"{target - baseline:.4f}", delta_color="inverse")
+        
+        input()
 
         if len(y_true) == 0:
             st.warning("No overlapping valid numeric rows were found. Metrics are NaN.")
+
 
     except Exception as exc:
         st.error(f"Evaluation failed: {exc}")
