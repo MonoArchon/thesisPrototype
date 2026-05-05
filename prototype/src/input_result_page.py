@@ -200,11 +200,31 @@ def page_two() -> None:
             st.session_state.show_mirror = False
 
         # Main content with optional right sidebar
-        left_col, right_col = st.columns([3, 2]) if st.session_state.show_mirror else (st.container(), None)
+        left_col, right_col = st.columns([2.5, 2]) if st.session_state.show_mirror else (st.container(), None)
 
         with left_col:
             # display metrics as graphs
             st.subheader("Evaluation Metrics")
+                    # 1-day ahead forecast
+        st.subheader("1-Day Ahead Precipitation Forecast (measured in inches)")
+        
+        if len(aligned) > 0:
+            # use the last ensemble prediction as the 1-day ahead forecast
+            last_baseline = y_true.iloc[-1] if len(y_true) > 0 else 0
+            last_ensemble = y_pred.iloc[-1] if len(y_pred) > 0 else 0
+            
+            col1_forecast, col2_forecast = st.columns(2)
+            
+            # placeholder
+            baseline = 6.181
+            target = 5.56
+
+            with col1_forecast:
+                st.metric("Last Observed Actual", f"{baseline:.4f}", delta=None)
+            
+            with col2_forecast:
+                st.metric("1-Day Ahead Forecast", f"{target:.4f}", 
+                         delta=f"{target - baseline:.4f}", delta_color="inverse")
 
             # Use vertical layout when mirror is shown, horizontal otherwise
             if st.session_state.show_mirror:
@@ -286,7 +306,7 @@ def page_two() -> None:
         # Mirror Comparison on the right side
         if st.session_state.show_mirror and right_col:
             with right_col:
-                st.subheader("1-Day Ahead Precipitation Forecast (measured in inches)")
+                st.subheader("1-Day Ahead Precipitation Forecast Comparison")
                 st.caption("Current vs Previous")
 
                 current_col, previous_col = st.columns(2)
@@ -325,26 +345,7 @@ def page_two() -> None:
                     st.pyplot(fig, use_container_width=True)
                     plt.close(fig)
 
-        # 1-day ahead forecast
-        st.subheader("1-Day Ahead Precipitation Forecast (measured in inches)")
-        
-        if len(aligned) > 0:
-            # use the last ensemble prediction as the 1-day ahead forecast
-            last_baseline = y_true.iloc[-1] if len(y_true) > 0 else 0
-            last_ensemble = y_pred.iloc[-1] if len(y_pred) > 0 else 0
-            
-            col1_forecast, col2_forecast = st.columns(2)
-            
-            # placeholder
-            baseline = 6.181
-            target = 5.56
 
-            with col1_forecast:
-                st.metric("Last Observed Actual", f"{baseline:.4f}", delta=None)
-            
-            with col2_forecast:
-                st.metric("1-Day Ahead Forecast", f"{target:.4f}", 
-                         delta=f"{target - baseline:.4f}", delta_color="inverse")
         
         input()
 
